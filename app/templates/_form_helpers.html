@@ -1,0 +1,45 @@
+{% macro render_field(field, label_visible=true) %}
+    {% if label_visible %}
+        {{ field.label(class="form-label") }}
+    {% endif %}
+    
+    {% if field.type == 'TextAreaField' %}
+        {{ field(class="form-control" + (" is-invalid" if field.errors else ""), rows=(kwargs.pop('rows', 3)), **kwargs) }}
+    {% elif field.type == 'FileField' %}
+         {{ field(class="form-control" + (" is-invalid" if field.errors else ""), **kwargs) }}
+    {% elif field.type == 'SelectField' %}
+        {{ field(class="form-select" + (" is-invalid" if field.errors else ""), **kwargs) }}
+    {% else %}
+        {{ field(class="form-control" + (" is-invalid" if field.errors else ""), **kwargs) }}
+    {% endif %}
+    
+    {% if field.description %}
+        <div class="form-text text-muted small">{{ field.description|safe }}</div>
+    {% endif %}
+
+    {% if field.errors %}
+        <div class="invalid-feedback">
+            {% for error in field.errors %}
+                <span>{{ error }}</span><br>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_submit_field(field) %}
+    {{ field(class="btn btn-primary") }}
+{% endmacro %}
+
+{% macro render_checkbox_field(field) %}
+    <div class="form-check">
+        {{ field(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+        {{ field.label(class="form-check-label") }}
+        {% if field.errors %}
+            <div class="invalid-feedback d-block">
+                {% for error in field.errors %}
+                    <span>{{ error }}</span><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}

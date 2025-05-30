@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список объектов недвижимости</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; /* DejaVu Sans for good Unicode coverage */ }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        th, td { border: 1px solid #ccc; padding: 4px; text-align: left; word-wrap: break-word; }
+        th { background-color: #f2f2f2; }
+        h1 { text-align: center; font-size: 16px; }
+        .price { white-space: nowrap; } /* Prevent price from wrapping */
+    </style>
+</head>
+<body>
+    <h1>Список объектов недвижимости</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Адрес</th>
+                <th>Район</th>
+                <th>Улица</th>
+                <th class="price">Цена (тг)</th>
+                <th>Площадь (м²)</th>
+                <th>Этаж/Этажность</th>
+                <th>Год</th>
+                <th>Состояние</th>
+                <th>Источник</th>
+                <th>Статус</th>
+                <th>Изображения</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prop in properties %}
+            <tr>
+                <td>{{ prop.id }}</td>
+                <td>{{ prop.name }}</td>
+                <td>{{ prop.address | default('-', true) }}</td>
+                <td>{{ prop.district | default('-', true) }}</td>
+                <td>{{ prop.street | default('-', true) }}</td>
+                <td class="price">{{ "{:,.0f}".format(prop.price).replace(",", " ") if prop.price else '-' }}</td>
+                <td>{{ prop.area | default('-', true) }}</td>
+                <td>{{ prop.floor | default('?') }}/{{ prop.total_floors | default('?') }}</td>
+                <td>{{ prop.year | default('-', true) }}</td>
+                <td>{{ prop.condition | default('-', true) }}</td>
+                <td>{{ prop.source | default('-', true) }}</td>
+                <td>{{ prop.status | default('-', true) }}</td>
+                <td>
+                    {% if prop.images %}
+                        {{ prop.images.count() }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

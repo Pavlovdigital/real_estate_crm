@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h2>Профиль пользователя</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <p>Привет, {{ current_user.username }}!</p>
+        <p>Это ваша страница профиля.</p>
+        <p>Ваша электронная почта: {{ current_user.email }}</p>
+        <p>Ваша роль: {{ current_user.role.name if current_user.role else 'Не назначена' }}</p>
+    </div>
+{% endblock %}

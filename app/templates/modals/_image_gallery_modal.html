@@ -1,0 +1,20 @@
+<!-- Image Modal Structure -->
+<div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered"> {# modal-xl for larger images #}
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageGalleryModalLabel">Просмотр изображения</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="" id="modalImageDisplay" class="img-fluid" alt="Просмотр изображения" style="max-height: 80vh;"> {# Adjusted max-height #}
+        <p id="modalImageFilenameDisplay" class="mt-2 text-muted small"></p>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" id="modalPrevImage"><i class="bi bi-arrow-left-circle"></i> Предыдущее</button>
+        <p id="modalImageCounter" class="mb-0 small text-muted"></p>
+        <button type="button" class="btn btn-outline-secondary" id="modalNextImage">Следующее <i class="bi bi-arrow-right-circle"></i></button>
+      </div>
+    </div>
+  </div>
+</div>

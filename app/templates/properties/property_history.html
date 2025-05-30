@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ title }}</h2>
+        <a href="{{ url_for('view_property', property_id=property.id) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> К объекту</a>
+    </div>
+
+    {% include '_flash_messages.html' %}
+
+    {% if history_records %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 20%;">Дата/Время</th>
+                    <th style="width: 15%;">Пользователь</th>
+                    <th style="width: 15%;">Поле</th>
+                    <th style="width: 25%;">Старое значение</th>
+                    <th style="width: 25%;">Новое значение</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history_records %}
+                <tr>
+                    <td>{{ record.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                    <td>{{ record.user.username if record.user else 'N/A (Система)' }}</td>
+                    <td>{{ record.field_name }}</td>
+                    <td><pre class="mb-0"><small>{{ record.old_value if record.old_value is not none else '-' }}</small></pre></td>
+                    <td><pre class="mb-0"><small>{{ record.new_value if record.new_value is not none else '-' }}</small></pre></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Нет записей в истории изменений для этого объекта.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

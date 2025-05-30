@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_form_helpers.html" import render_field %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                     <h2 class="text-center mb-0">{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    {% include '_flash_messages.html' %}
+
+                    <form method="POST" action="" novalidate> {# Action URL set by route #}
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ render_field(form.username, class="form-control", autocomplete="username") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ render_field(form.email, class="form-control", autocomplete="email") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ render_field(form.role_id, class="form-select") }}
+                        </div>
+                        
+                        <div class="mt-4 d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary me-md-2">Отмена</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

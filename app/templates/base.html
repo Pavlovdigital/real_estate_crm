@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light"> {# Default to light theme, JS will update this #}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - CRM Недвижимость</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons (optional, for theme switcher icon) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid"> {# Use container-fluid for full-width navbar #}
+            <a class="navbar-brand" href="{{ url_for('index') }}">CRM Недвижимость</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключатель навигации">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0"> {# Use me-auto for margin, and updated spacing classes #}
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('dashboard') %}active{% endif %}" href="{{ url_for('dashboard') }}">Панель управления</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint.startswith('list_properties') or request.endpoint.startswith('add_property') or request.endpoint.startswith('view_property') or request.endpoint.startswith('edit_property') %}active{% endif %}" href="{{ url_for('list_properties') }}">Объекты</a>
+                    </li>
+                    <li class="nav-item dropdown {% if request.blueprint == 'client' or request.blueprint == 'matching' %}active{% endif %}">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarClientDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Клиенты
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarClientDropdown">
+                            <li><a class="dropdown-item {% if request.blueprint == 'client' and request.endpoint.endswith('list_clients') %}active{% endif %}" href="{{ url_for('client.list_clients') }}">Список клиентов</a></li>
+                            <li><a class="dropdown-item {% if request.blueprint == 'client' and request.endpoint.endswith('add_client') %}active{% endif %}" href="{{ url_for('client.add_client') }}">Добавить клиента</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if request.blueprint == 'matching' %}active{% endif %}" href="{{ url_for('matching.match_properties_to_client') }}">Подбор объектов</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.blueprint == 'deal' %}active{% endif %}" href="{{ url_for('deal.list_deals') }}">Сделки</a>
+                    </li>
+                    {# Admin specific links #}
+                    {% if current_user.role and current_user.role.name == 'Admin' %}
+                    <li class="nav-item dropdown {% if request.blueprint == 'admin' %}active{% endif %}">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Админка
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarAdminDropdown">
+                            <li><a class="dropdown-item {% if request.blueprint == 'admin' and request.endpoint.endswith('parser_dashboard') %}active{% endif %}" href="{{ url_for('admin.parser_dashboard') }}">Управление Парсером</a></li>
+                            <li><a class="dropdown-item {% if request.blueprint == 'admin' and request.endpoint.endswith('list_users') %}active{% endif %}" href="{{ url_for('admin.list_users') }}">Управление Пользователями</a></li>
+                            {# Add other admin links here #}
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Главная</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                {# Global Search Form - Placed before user actions for better layout flow #}
+                {% if current_user.is_authenticated %} {# Show search only to logged-in users #}
+                <form method="GET" action="{{ url_for('global_search_results') }}" class="d-flex ms-auto me-3 my-2 my-lg-0" role="search"> {# ms-auto to push to right, me-3 for spacing #}
+                    {% if g.global_search_form %} {# Ensure form is available #}
+                        {{ g.global_search_form.query(class="form-control form-control-sm", type="search", placeholder="Общий поиск...") }}
+                        <button class="btn btn-outline-light btn-sm ms-1" type="submit"><i class="bi bi-search"></i></button>
+                    {% endif %}
+                </form>
+                {% endif %}
+
+                <ul class="navbar-nav"> {# Removed ms-auto from here as search form is now ms-auto #}
+                    <li class="nav-item me-2"> 
+                        <button id="themeToggleBtn" class="btn btn-outline-light btn-sm" type="button" title="Переключить тему">
+                            <i class="bi bi-brightness-high-fill" id="themeIcon"></i> 
+                        </button>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ current_user.username }} {% if current_user.role %}({{ current_user.role.name }}){% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                                <li><a class="dropdown-item {% if request.endpoint.startswith('profile') %}active{% endif %}" href="{{ url_for('profile') }}">Профиль</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'login' %}active{% endif %}" href="{{ url_for('login') }}">Войти</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'register' %}active{% endif %}" href="{{ url_for('register') }}">Регистрация</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-body-tertiary border-top"> {# Updated Bootstrap 5 classes #}
+      <div class="container text-center">
+        <span class="text-muted">CRM Недвижимость &copy; {{ "now"|date("Y") }}</span>
+      </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

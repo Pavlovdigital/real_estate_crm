@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4"> {# Use container-fluid for wider Kanban #}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ title }}</h2>
+        <a href="{{ url_for('deal.list_deals') }}" class="btn btn-outline-secondary"><i class="bi bi-list-ul"></i> Списком</a>
+    </div>
+
+    {% include '_flash_messages.html' %}
+
+    <div class="row g-3">
+        {% for stage_enum_member in stages %}
+            <div class="col-lg col-md-6 mb-3"> {# Equal width columns on large screens #}
+                <div class="card shadow-sm kanban-column" id="stage-{{ stage_enum_member.value|lower|replace(' ', '-') }}" data-stage-value="{{ stage_enum_member.value }}">
+                    <div class="card-header bg-light text-center fw-bold">
+                        {{ stage_enum_member.value }} {# Displaying the value which is the Russian name #}
+                    </div>
+                    <div class="card-body kanban-cards-container" style="min-height: 200px; background-color: #f8f9fa;">
+                        {% set deals_in_stage = deals_by_stage.get(stage_enum_member.value, []) %}
+                        {% if deals_in_stage %}
+                            {% for deal in deals_in_stage %}
+                                <div class="card kanban-card mb-2 shadow-sm" draggable="true" id="deal-{{ deal.id }}" data-deal-id="{{ deal.id }}">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1 fs-6">{{ deal.title }}</h6>
+                                        <p class="card-text small mb-1">
+                                            <i class="bi bi-person-circle"></i> {{ deal.client.name if deal.client else 'N/A' }}
+                                        </p>
+                                        <p class="card-text small mb-0">
+                                            <i class="bi bi-building"></i> {{ deal.property.name[:30] if deal.property else 'N/A' }}{% if deal.property and deal.property.name|length > 30 %}...{% endif %}
+                                        </p>
+                                        <p class="card-text small text-muted mt-1">
+                                            <i class="bi bi-briefcase"></i> {{ deal.agent.username if deal.agent else 'N/A' }}
+                                        </p>
+                                        <a href="{{ url_for('deal.edit_deal', deal_id=deal.id) }}" class="stretched-link"></a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small text-center mt-2">Нет сделок на этой стадии.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const kanbanCards = document.querySelectorAll('.kanban-card');
+    const kanbanColumns = document.querySelectorAll('.kanban-column');
+    let draggedItem = null;
+
+    kanbanCards.forEach(card => {
+        card.addEventListener('dragstart', function () {
+            draggedItem = this;
+            setTimeout(() => {
+                this.style.opacity = '0.5'; // Make it semi-transparent while dragging
+            }, 0);
+        });
+
+        card.addEventListener('dragend', function () {
+            setTimeout(() => {
+                this.style.opacity = '1'; // Reset opacity
+                draggedItem = null;
+            }, 0);
+        });
+    });
+
+    kanbanColumns.forEach(column => {
+        const cardsContainer = column.querySelector('.kanban-cards-container');
+        
+        cardsContainer.addEventListener('dragover', function (e) {
+            e.preventDefault(); // Necessary to allow dropping
+        });
+
+        cardsContainer.addEventListener('dragenter', function (e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#e9ecef'; // Highlight drop zone
+        });
+
+        cardsContainer.addEventListener('dragleave', function () {
+            this.style.backgroundColor = '#f8f9fa'; // Reset background
+        });
+
+        cardsContainer.addEventListener('drop', function () {
+            this.style.backgroundColor = '#f8f9fa'; // Reset background
+            if (draggedItem) {
+                this.appendChild(draggedItem); // Move card to new column's card container
+                const dealId = draggedItem.dataset.dealId;
+                const newStage = column.dataset.stageValue;
+                
+                // Update deal stage via AJAX
+                const updateUrl = `/deals/${dealId}/update_stage`; // Construct URL directly
+
+                fetch(updateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add CSRF token header if Flask-WTF CSRF protection is enabled globally
+                        // 'X-CSRFToken': '{{ csrf_token() }}' // Requires CSRF token to be available
+                    },
+                    body: JSON.stringify({ stage: newStage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log(`Deal ${dealId} stage updated to ${newStage}`);
+                        // Optionally, flash a message or update UI further.
+                        // For now, visual move is the main feedback.
+                        // A small visual cue like a temporary border color change could be added.
+                        draggedItem.classList.add('border-success');
+                        setTimeout(() => draggedItem.classList.remove('border-success'), 1000);
+
+                    } else {
+                        console.error('Error updating deal stage:', data.message);
+                        alert(`Ошибка обновления стадии: ${data.message}`);
+                        // Revert card to original column if update fails? (More complex UI handling)
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert(`Сетевая ошибка при обновлении стадии: ${error}`);
+                });
+            }
+        });
+    });
+});
+</script>
+<style>
+    .kanban-card { cursor: grab; }
+    .kanban-card:active { cursor: grabbing; }
+    /* Add some basic styling for empty columns if needed */
+    .kanban-cards-container:empty::after {
+        content: "Перетащите сделки сюда";
+        display: block;
+        text-align: center;
+        color: #aaa;
+        padding-top: 50px; /* Adjust as needed */
+        font-style: italic;
+    }
+</style>
+{% endblock %}

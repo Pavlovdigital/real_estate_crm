@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% from "_form_helpers.html" import render_field %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ title }}</h2>
+
+    {% include '_flash_messages.html' %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Выбор клиента</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('matching.match_properties_to_client') }}" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="row align-items-end">
+                    <div class="col-md-8">
+                        {{ render_field(form.client_id, class="form-select") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_client %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Интересы клиента: {{ selected_client.name }}</h5>
+            </div>
+            <div class="card-body">
+                {% if client_interests_display %}
+                    <dl class="row">
+                        {% for key, value in client_interests_display.items() %}
+                            <dt class="col-sm-3 text-capitalize">{{ key.replace('_', ' ') }}:</dt>
+                            <dd class="col-sm-9">
+                                {% if value is iterable and value is not string %}
+                                    {{ value|join(', ') }}
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            </dd>
+                        {% endfor %}
+                    </dl>
+                {% else %}
+                    <p class="text-muted">Интересы для этого клиента не указаны или некорректны.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if matching_properties %}
+        <h4 class="mt-4">Подходящие объекты (Найдено: {{ matching_properties|length }})</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Адрес</th>
+                        <th>Район</th>
+                        <th class="text-end">Цена (тг)</th>
+                        <th class="text-end">Площадь (м²)</th>
+                        <th class="text-center">Этаж</th>
+                        <th>Состояние</th>
+                        <th>Планировка</th>
+                        <th class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prop in matching_properties %}
+                    <tr>
+                        <td>{{ prop.id }}</td>
+                        <td><a href="{{ url_for('view_property', property_id=prop.id) }}">{{ prop.name }}</a></td>
+                        <td>{{ prop.address if prop.address else '-' }}</td>
+                        <td>{{ prop.district if prop.district else '-' }}</td>
+                        <td class="text-end">{{ "{:,.0f}".format(prop.price).replace(",", " ") if prop.price else '-' }}</td>
+                        <td class="text-end">{{ prop.area if prop.area else '-' }}</td>
+                        <td class="text-center">{{ prop.floor if prop.floor else '-' }}</td>
+                        <td>{{ prop.condition if prop.condition else '-' }}</td>
+                        <td>{{ prop.layout if prop.layout else '-' }}</td>
+                        <td class="text-end">
+                             <a href="{{ url_for('view_property', property_id=prop.id) }}" class="btn btn-xs btn-outline-info" title="Обзор"><i class="bi bi-eye"></i></a>
+                             {# Add to deal button could be an enhancement here #}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif selected_client and selected_client.interests and form.is_submitted() %} {# Only show if form submitted for a client with interests #}
+        <div class="alert alert-info mt-3">
+            По заданным интересам клиента объекты не найдены.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

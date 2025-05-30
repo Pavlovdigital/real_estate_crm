@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="text-center mb-0">{{ legend | default('Форма сделки') }}</h2>
+                </div>
+                <div class="card-body">
+                    {% include '_flash_messages.html' %}
+
+                    <form method="POST" action="" novalidate> {# Action URL set by route #}
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.client_id.label(class="form-label") }}
+                            {{ form.client_id(class="form-select" + (" is-invalid" if form.client_id.errors else "")) }}
+                            {% if form.client_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.client_id.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.property_id.label(class="form-label") }}
+                            {{ form.property_id(class="form-select" + (" is-invalid" if form.property_id.errors else "")) }}
+                            {% if form.property_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.property_id.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.agent_id.label(class="form-label") }}
+                            {{ form.agent_id(class="form-select" + (" is-invalid" if form.agent_id.errors else "")) }}
+                            {% if form.agent_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.agent_id.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.stage.label(class="form-label") }}
+                            {{ form.stage(class="form-select" + (" is-invalid" if form.stage.errors else "")) }}
+                            {% if form.stage.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.stage.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-4 d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('deal.list_deals') }}" class="btn btn-outline-secondary me-md-2">Отмена</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

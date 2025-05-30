@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% from "_form_helpers.html" import render_field %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                     <h2 class="text-center mb-0">{{ legend | default('Форма объекта недвижимости') }}</h2>
+                </div>
+                <div class="card-body">
+                    {% include '_flash_messages.html' %}
+
+                    <form method="POST" enctype="multipart/form-data" action="" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        {{ render_field(form.name, class="form-control form-control-lg", placeholder="Например: 2-комнатная квартира в центре") }}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                {{ render_field(form.address, class="form-control", placeholder="Город, улица, номер дома, квартира") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.district, class="form-control", placeholder="Район") }}
+                            </div>
+                        </div>
+                         <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ render_field(form.street, class="form-control", placeholder="Улица") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.d_kv, class="form-control", placeholder="Дом/Кв. №") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ render_field(form.cat, class="form-control", placeholder="Напр: Квартира, Дом") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.status, class="form-control", placeholder="Напр: Активно, Продано") }}
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+                        <h5 class="mb-3">Детали объекта</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ render_field(form.price, class="form-control", type="number", step="any", placeholder="Цена в тг") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.area, class="form-control", type="number", step="any", placeholder="Общая площадь") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.s, class="form-control", placeholder="S жилая/доп.") }}
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ render_field(form.s_kh, class="form-control", placeholder="S кухни") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.floor, class="form-control", type="number", placeholder="Этаж") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.total_floors, class="form-control", type="number", placeholder="Всего этажей") }}
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                             <div class="col-md-4">
+                                {{ render_field(form.year, class="form-control", placeholder="Год постройки") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.layout, class="form-control", placeholder="Планировка") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.condition, class="form-control", placeholder="Состояние") }}
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                {{ render_field(form.m, class="form-control", placeholder="Материал стен") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.blkn, class="form-control", placeholder="Балкон/Лоджия") }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ render_field(form.p, class="form-control", placeholder="Расположение (угловая)") }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-3">
+                        {{ render_field(form.description, class="form-control", rows="4") }}
+                        
+                        <hr class="my-3">
+                        <h5 class="mb-3">Источник и контакт</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ render_field(form.seller_phone, class="form-control", type="tel") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.source, class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ render_field(form.link, class="form-control", type="url") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.external_id, class="form-control") }}
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+                        <h5 class="mb-3">Фотографии</h5>
+                        
+                        {# Display existing images with delete checkboxes - only in edit mode #}
+                        {% if property and property.images.count() > 0 %}
+                            <h6>Существующие фотографии:</h6>
+                            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-3">
+                                {% for image in property.images %}
+                                <div class="col">
+                                    <div class="card existing-image-card text-center">
+                                        <img src="{{ url_for('serve_property_image', image_id=image.id) }}" 
+                                             class="img-thumbnail" 
+                                             alt="{{ image.filename or 'Фото ' ~ loop.index }}" 
+                                             style="max-height: 100px; max-width: 100%; object-fit: contain; margin-bottom: 5px;">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="delete_image_{{ image.id }}" value="{{ image.id }}" id="delete_image_{{ image.id }}">
+                                            <label class="form-check-label small" for="delete_image_{{ image.id }}">Удалить</label>
+                                        </div>
+                                        {% if image.filename %}
+                                            <small class="text-muted d-block" style="font-size: 0.75rem; word-break: break-all;">{{ image.filename }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <p><small class="text-muted">Отметьте изображения для удаления. Загрузка новых файлов ниже заменит все существующие изображения, если не выбрано иное поведение в настройках (текущая логика: заменяет).</small></p>
+                        {% elif property %}
+                            <p class="text-muted">Для этого объекта еще нет фотографий.</p>
+                        {% endif %}
+
+                        {# Field for uploading new images #}
+                        <div class="mb-3">
+                             {{ render_field(form.uploaded_images, class="form-control") }}
+                             <small class="form-text text-muted">Вы можете загрузить несколько изображений. Старые изображения будут удалены при загрузке новых, если не отмечено иное.</small>
+                        </div>
+                        
+                        <div class="mt-4 d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ request.referrer or url_for('list_properties') }}" class="btn btn-outline-secondary me-md-2">Отмена</a>
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .existing-image-card {
+        padding: 0.5rem;
+        border: 1px solid #eee;
+        border-radius: .25rem;
+    }
+</style>

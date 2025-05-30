@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ title }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Запуск парсеров</h5>
+                </div>
+                <div class="card-body">
+                    <p>Нажмите кнопки ниже, чтобы запустить соответствующий парсер. Обработка будет идти в фоновом режиме.</p>
+                    <button id="run-olx-parser" data-run-url="{{ url_for('admin.run_olx_parser_route') }}" class="btn btn-primary mb-2 w-100">
+                        <i class="bi bi-arrow-repeat"></i> Запустить парсер OLX.kz
+                    </button>
+                    <button id="run-krisha-parser" data-run-url="{{ url_for('admin.run_krisha_parser_route') }}" class="btn btn-info mb-2 w-100">
+                        <i class="bi bi-arrow-repeat"></i> Запустить парсер Krisha.kz
+                    </button>
+                </div>
+            </div>
+             <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Управление Пользователями</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary w-100">
+                        <i class="bi bi-people-fill"></i> Список пользователей
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Статус Парсинга</h5>
+                </div>
+                <div class="card-body">
+                    <p id="parser-current-task" class="text-muted">Ожидание запуска парсера...</p>
+                    <div class="progress mb-2" role="progressbar" aria-label="Прогресс парсинга" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="display: none;">
+                        <div id="parser-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                    </div>
+                    <h6>Логи:</h6>
+                    <pre id="parser-log-output" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 10px;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Последние результаты запуска</h5>
+        </div>
+        <div id="last-run-summary-display" class="card-body">
+            {% if session.last_parser_run_summary %}
+                <p><strong>Сводка последнего сохраненного запуска:</strong></p>
+                <ul>
+                    <li>Добавлено: {{ session.last_parser_run_summary.added }}</li>
+                    <li>Обновлено: {{ session.last_parser_run_summary.updated }}</li>
+                    <li>Ошибок: {{ session.last_parser_run_summary.errors }}</li>
+                    <li>Пропущено: {{ session.last_parser_run_summary.skipped }}</li>
+                </ul>
+            {% else %}
+                <p class="text-muted">Информация о последнем запуске отсутствует в сессии.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }} {# Include scripts from base.html if any #}
+{# Pass the status URL to the admin_parser.js script #}
+<script>
+    var parserStatusUrl = "{{ url_for('admin.parser_status_route') }}";
+</script>
+<script src="{{ url_for('static', filename='js/admin_parser.js') }}"></script>
+{% endblock %}

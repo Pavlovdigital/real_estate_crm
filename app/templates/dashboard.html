@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Панель управления</h2>
+    <p class="lead">Добро пожаловать, {{ current_user.username }}!</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row mt-4 g-3"> {# g-3 for gutters #}
+        <div class="col-md-4">
+            <div class="card text-center h-100"> {# h-100 for equal height cards #}
+                <div class="card-body">
+                    <h5 class="card-title">Количество объектов</h5>
+                    <p class="card-text display-4">{{ stats.num_properties if stats else 'N/A' }}</p>
+                    <a href="{{ url_for('list_properties') }}" class="btn btn-primary">Подробнее <i class="bi bi-arrow-right-circle-fill"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Количество клиентов</h5>
+                    <p class="card-text display-4">{{ stats.num_clients if stats else 'N/A' }}</p>
+                    <a href="#" class="btn btn-primary">Подробнее <i class="bi bi-arrow-right-circle-fill"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Количество сделок</h5>
+                    <p class="card-text display-4">{{ stats.num_deals if stats else 'N/A' }}</p>
+                    <a href="#" class="btn btn-primary">Подробнее <i class="bi bi-arrow-right-circle-fill"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placeholder for future content -->
+    <div class="mt-5">
+        <h4>Быстрые действия</h4>
+        <p>
+            <a href="{{ url_for('add_property') }}" class="btn btn-success"><i class="bi bi-plus-circle-fill"></i> Добавить объект</a>
+            <a href="#" class="btn btn-info"><i class="bi bi-person-plus-fill"></i> Добавить клиента</a>
+            <a href="#" class="btn btn-warning"><i class="bi bi-briefcase-fill"></i> Создать сделку</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

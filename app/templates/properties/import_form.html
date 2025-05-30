@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_form_helpers.html" import render_field %} {# Assuming you might use a macro for fields #}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="text-center mb-0">{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    {% include '_flash_messages.html' %}
+
+                    <p class="mb-3">Укажите имена столбцов из вашего Excel (.xlsx) файла, которые соответствуют полям объекта недвижимости.
+                    Обязательные поля для импорта: "Название объекта", "Цена", "Площадь (кв.м)".</p>
+                    
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('import_properties') }}" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ render_field(form.excel_file, class="form-control") }}
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">Сопоставление столбцов:</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ render_field(form.name_col, class="form-control", placeholder="Например: Название") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ render_field(form.address_col, class="form-control", placeholder="Например: Адрес полный") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ render_field(form.district_col, class="form-control", placeholder="Например: Район города") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ render_field(form.price_col, class="form-control", placeholder="Например: Стоимость") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ render_field(form.floor_col, class="form-control", placeholder="Например: Этаж") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ render_field(form.area_col, class="form-control", placeholder="Например: Общая площадь") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ render_field(form.year_built_col, class="form-control", placeholder="Например: Год постройки") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                             <div class="col-md-6 mb-3">
+                                {{ render_field(form.layout_col, class="form-control", placeholder="Например: Планировка") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ render_field(form.condition_col, class="form-control", placeholder="Например: Состояние") }}
+                            </div>
+                        </div>
+                         <div class="mb-3">
+                            {{ render_field(form.description_col, class="form-control", placeholder="Например: Полное описание", rows="3") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ render_field(form.seller_phone_col, class="form-control", placeholder="Например: Контактный телефон") }}
+                        </div>
+                        
+                        <div class="mt-4 d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('list_properties') }}" class="btn btn-outline-secondary me-md-2">Отмена</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

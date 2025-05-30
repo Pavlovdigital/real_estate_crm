@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ title }}</h2>
+        <div>
+            <a href="{{ url_for('deal.kanban_board') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-kanban"></i> Доска Канбан</a>
+            <a href="{{ url_for('deal.add_deal') }}" class="btn btn-success"><i class="bi bi-plus-circle-fill"></i> Добавить сделку</a>
+        </div>
+    </div>
+
+    {% include '_flash_messages.html' %}
+
+    {% if deals %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Название</th>
+                    <th>Клиент</th>
+                    <th>Объект</th>
+                    <th>Агент</th>
+                    <th>Стадия</th>
+                    <th>Дата создания</th>
+                    <th>Обновлено</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for deal_item in deals %}
+                <tr>
+                    <td>{{ deal_item.title }}</td>
+                    <td><a href="{{ url_for('client.edit_client', client_id=deal_item.client.id) }}">{{ deal_item.client.name if deal_item.client else 'N/A' }}</a></td>
+                    <td><a href="{{ url_for('view_property', property_id=deal_item.property.id) }}">{{ deal_item.property.name if deal_item.property else 'N/A' }}</a></td>
+                    <td>{{ deal_item.agent.username if deal_item.agent else 'N/A' }}</td>
+                    <td><span class="badge bg-secondary">{{ deal_item.stage }}</span></td>
+                    <td>{{ deal_item.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ deal_item.updated_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td class="text-end">
+                        <a href="{{ url_for('deal.edit_deal', deal_id=deal_item.id) }}" class="btn btn-sm btn-primary me-1" title="Редактировать"><i class="bi bi-pencil-square"></i></a>
+                        <form action="{{ url_for('deal.delete_deal', deal_id=deal_item.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить сделку: {{ deal_item.title|e }}?');"><i class="bi bi-trash-fill"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Пока нет созданных сделок. <a href="{{ url_for('deal.add_deal') }}" class="alert-link">Создать новую сделку?</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
